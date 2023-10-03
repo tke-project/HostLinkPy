@@ -1,3 +1,5 @@
+import struct
+
 #ワードを定義するクラス
 
 class Word:
@@ -13,9 +15,17 @@ class Word:
     def __init__(self, address, hi_value, lo_value):
         self.address = address
         self.hi_value = hi_value
-        self.lo_value = lo_value
+        self.lo_value = lo_value        
+     
+    def to_short(self):
+        buf = bytes([self.lo_value, self.hi_value])
         
-    def to_int16(self):
-        bytes = [self.lo_value, self.hi_value]
+        return struct.unpack('<h',buf)[0]
+    
+    def to_ushort(self):
+        buf = bytes([self.lo_value, self.hi_value])
         
-        return int.from_bytes(bytes, 'little')
+        return struct.unpack('<H',buf)[0]
+    
+   
+        
