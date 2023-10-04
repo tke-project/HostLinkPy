@@ -5,10 +5,7 @@ from device import word as w
 
 class DoubleWord:
     
-    address = ""
-    hi_word = w.Word('',0,0)
-    lo_word = w.Word('',0,0)
-    
+   
     #コンストラクタ
     #address -- "MR001"などのアドレス番号
     #hi_value -- 上位8バイト
@@ -20,27 +17,76 @@ class DoubleWord:
      
     def to_short(self):
         
-        return self.lo_word.to_short()
+        return self.lo_word.to_short()[0]
     
     def to_ushort(self):
         
-        return self.lo_word.to_ushort()
+        return self.lo_word.to_ushort()[0]
  
     def to_int(self):
         buf = bytes([self.lo_word.lo_value, self.lo_word.hi_value,
                     self.hi_word.lo_value, self.hi_word.hi_value])
         
-        return struct.unpack('<i', buf)
+        return struct.unpack('<i', buf)[0]
     
     def to_uint(self):
         buf = bytes([self.lo_word.lo_value, self.lo_word.hi_value,
                     self.hi_word.lo_value, self.hi_word.hi_value])
         
-        return struct.unpack('<I', buf)
+        return struct.unpack('<I', buf)[0]
 
     def to_float(self):
         buf = bytes([self.lo_word.lo_value, self.lo_word.hi_value,
                     self.hi_word.lo_value, self.hi_word.hi_value])
         
-        return struct.unpack('<f', buf)
+        return struct.unpack('<f', buf)[0]
+    
+    def to_hex(self):
+        lo_str = self.lo_word.to_hex()
+        hi_str = self.hi_word.to_hex()
+        
+        return hi_str + lo_str
+    
+    def to_bits(self):             
+        lo_bits = self.lo_word.to_bits()
+        hi_bits = self.hi_word.to_bits()
+        
+        lo_bits.extend(hi_bits)
+        
+        return lo_bits
+        
+    @staticmethod
+    def from_int(address, value):
+        buf = struct.pack('<i', value)
+        
+        lo_word = w.Word(address, buf[1], buf[0])
+        hi_word = w.Word(address, buf[3], buf[2])
+        
+        return DoubleWord(address, hi_word, lo_word)
+          
+    @staticmethod
+    def from_uint(address, value):
+        buf = struct.pack('<I', value)
+        
+        lo_word = w.Word(address, buf[1], buf[0])
+        hi_word = w.Word(address, buf[3], buf[2])
+        
+        return DoubleWord(address, hi_word, lo_word)
    
+    @staticmethod
+    def from_float(address, value):
+        buf = struct.pack('<f', value)
+        
+        lo_word = w.Word(address, buf[1], buf[0])
+        hi_word = w.Word(address, buf[3], buf[2])
+        
+        return DoubleWord(address, hi_word, lo_word)
+
+    @staticmethod
+    def from_hex(address, value):
+        buf = bytes.fromhex(value)
+        
+        lo_word = w.Word(address, buf[2], buf[3])
+        hi_word = w.Word(address, buf[0], buf[1])
+        
+        return DoubleWord(address, hi_word, lo_word)
